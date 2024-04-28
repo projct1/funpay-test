@@ -7,11 +7,10 @@ use FpDbTest\Enums\CustomQueryParamModifiersEnum;
 final class QueryMatchItem
 {
     public function __construct(
-        public string $match,       //один из спецификаторов, либо условный блок в сыром виде и с фигурными скобками
-        public int $position,       //позиция в строке запроса (смещение от начала строки)
-        public string $group,       //содержимое условного блока без фигурных скобок
-        public mixed $value = null, //подставляемое значение для совпадения
-        public int $offset = 0      //дополнительное смещение, так как после замены спецификаторов длина запроса меняется и позиция совпадений соответственно
+        public string $match,      //один из спецификаторов, либо условный блок в сыром виде и с фигурными скобками
+        public int $position,      //позиция в строке запроса (смещение от начала строки)
+        public string $group,      //содержимое условного блока без фигурных скобок
+        public mixed $value = null //подставляемое значение для совпадения
     ) { }
 
     public function isConditionalBlock(): bool
