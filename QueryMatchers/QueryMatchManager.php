@@ -2,6 +2,8 @@
 
 namespace FpDbTest\QueryMatchers;
 
+use FpDbTest\Enums\CustomQueryParamModifiersEnum;
+
 class QueryMatchManager
 {
     protected int $offset = 0;
@@ -12,7 +14,16 @@ class QueryMatchManager
     public function __construct(array $matches, array $args)
     {
         foreach ($matches[0] as $index => $match) {
-            $this->matches[] = new QueryMatchItem($match[0], $match[1], $matches[1][$index][0] ?? null, $args[$index]);
+            $this->matches[$index] = new QueryMatchItem(
+                $match[0],
+                $match[1],
+                $matches[1][$index][0] ?? null,
+                array_slice(
+                    $args,
+                    $index ? count($this->matches[$index-1]->values) + $index - 1 : $index,
+                    substr_count($match[0], CustomQueryParamModifiersEnum::default->value)
+                )
+            );
         }
     }
 
@@ -33,7 +44,7 @@ class QueryMatchManager
 
     public function replaceMatch(QueryMatchItem $item): void
     {
-        $this->query = substr_replace($this->query, $item->value, $item->position + $this->offset, strlen($item->match));
-        $this->offset += strlen($item->value) - strlen($item->match);
+        $this->query = substr_replace($this->query, $item->values[0], $item->position + $this->offset, strlen($item->match));
+        $this->offset += strlen($item->values[0]) - strlen($item->match);
     }
 }

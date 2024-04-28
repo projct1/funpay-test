@@ -20,7 +20,7 @@ class Database implements DatabaseInterface
     public function buildQuery(string $query, array $args = []): string
     {
         if (preg_match_all(CustomQueryParamModifiersEnum::regexp(), $query, $matches, PREG_OFFSET_CAPTURE)) {
-            if (($cntMatches = count($matches[0])) !== $cntArgs = count($args)) {
+            if (($cntMatches = substr_count($query, '?')) !== $cntArgs = count($args)) {
                 throw new InvalidArgumentException(
                     "Количество спецификаторов ($cntMatches) в запросе « $query » не совпадает с количеством переданных значений ($cntArgs)"
                 );
@@ -42,13 +42,11 @@ class Database implements DatabaseInterface
                     }
 
                     if ($item->shouldntSkip($this->skip())) { //если переданное значение не нужно пропускать
-                        $item->setValue(
-                            $this->buildQuery($item->group, array_slice($args, $index)) //парсим отдельно условный блок
-                        );
+                        $item->setValues([$this->buildQuery($item->group, $item->values)]); //парсим отдельно условный блок
                     }
                 } else { //обрабатываем обычные спецификаторы
-                    $item->setValue(
-                        CustomQueryParamModifiersEnum::from($item->match)->transform($item->value, $this->mysqli)
+                    $item->setValues(
+                        [CustomQueryParamModifiersEnum::from($item->match)->transform($item->values[0], $this->mysqli)]
                     );
                 }
 
