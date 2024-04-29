@@ -44,6 +44,25 @@ class DatabaseTest
             );
         }
 
+        //выборка всех юзеров с сортировкой и пагинацией (несколько условных блоков)
+        $results[] = $this->db->buildQuery(
+            <<<SQL
+                SELECT ?#
+                FROM users as u
+                WHERE {u.id = ?d AND}u.created_at >= ?
+                {LIMIT ?d OFFSET ?d}
+                {ORDER BY ?# DESC}
+            SQL,
+            [
+                ['u.id', 'u.fio', 'u.created_at'],
+                null,
+                '2024-04-28',
+                20,
+                20,
+                'u.created_at'
+            ]
+        );
+
         return $results;
     }
 
@@ -56,6 +75,13 @@ class DatabaseTest
             'UPDATE users SET `name` = \'Jack\', `email` = NULL WHERE user_id = -1',
             'SELECT name FROM users WHERE `user_id` IN (1, 2, 3)',
             'SELECT name FROM users WHERE `user_id` IN (1, 2, 3) AND block = 1',
+            <<<SQL
+                SELECT `u.id`, `u.fio`, `u.created_at`
+                FROM users as u
+                WHERE u.created_at >= '2024-04-28'
+                LIMIT 20 OFFSET 20
+                ORDER BY `u.created_at` DESC
+            SQL
         ];
     }
 }
